@@ -55,7 +55,7 @@ function ClientScreen() {
         ? {...isLikedItem, selected: true}
         : {...isLikedItem, selected: false},
     );
-    AsyncStorage.setItem("ClientName",item.value);
+    AsyncStorage.setItem('ClientName', item.value);
     setIsLiked(updatedState);
   };
 
