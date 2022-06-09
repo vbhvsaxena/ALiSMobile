@@ -1,13 +1,19 @@
 import React, {useState} from 'react';
-import {View, StyleSheet, Image, Text, TouchableOpacity,ScrollView} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // import {APIurl} from './API/apiService'
 import CustomButton from './Framework/Wrappers/CustomButton';
 import CustomTextBox from './Framework/Wrappers/CustomTextBox';
 
-
-const APIUrl ='http://172.16.2.142/ALiS3.0_API/api/';
+const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
 //#region Styles
 const styles = StyleSheet.create({
   container: {
@@ -57,7 +63,21 @@ const styles = StyleSheet.create({
 export default class LoginScreen extends React.Component {
   constructor(props) {
     super(props);
+
+    //#region Check Async Storage exist or not
+    AsyncStorage.getItem('ClientName', (error, result) => {
+      if (error)
+        console.error('Something went wrong!'); //Redirect to Login Page
+      else if (result) {
+        console.log('Getting key was successful', result);
+        this.setState({ClientCode: result});
+      } else if (result === null) console.log('Key does not exists!');
+      //Redirect to Login Page
+    });
+    //#endRegion
+
     this.state = {
+      ClientCode: '',
       UserName: '',
       UserNameErrorMessage: '',
       Password: '',
@@ -94,7 +114,7 @@ export default class LoginScreen extends React.Component {
           'Access-Control-Allow-Headers':
             'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
           'Access-Control-Expose-Headers': 'Token',
-          ClientCode: 'NVDPBH',
+          ClientCode: this.state.ClientCode,
           Token: '',
         },
         body: JSON.stringify({
@@ -106,11 +126,12 @@ export default class LoginScreen extends React.Component {
       })
         .then(processResponse)
         .then(res => {
+          console.log('ClientCode on Login', this.state.ClientCode);
+          console.log('statusCode', statusCode);
           const {statusCode, data} = res;
           // Set User Data in Storage
           if (statusCode == 200) {
             if (data.Status === 'Pending') {
-
               console.log(data.ValidateUser_Res);
               this.props.navigation.navigate('OtpVerification');
               AsyncStorage.setItem(

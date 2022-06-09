@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+
+AsyncStorage.clear();
 
 const RadioButton = ({onPress, selected, children}) => {
   return (
@@ -22,6 +25,8 @@ const RadioButton = ({onPress, selected, children}) => {
 };
 
 function ClientScreen() {
+  const {navigate} = useNavigation();
+  const [clientCode, setClientCode] = useState(null);
   const [isLiked, setIsLiked] = useState([
     {
       id: 1,
@@ -59,12 +64,18 @@ function ClientScreen() {
     setIsLiked(updatedState);
   };
 
+  const redirectToLogin = () => {
+    AsyncStorage.getItem('ClientName')
+      .then(res => res)
+      .then(val => {
+        setClientCode(val);
+        console.log('clientCode', clientCode);
+        if (clientCode) navigate('Login');
+      });
+  };
+
   return (
     <View style={styles.app}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Radio Buttons</Text>
-      </View>
-      <Text style={styles.text}>Do you like react native?</Text>
       {isLiked.map(item => (
         <RadioButton
           onPress={() => onRadioBtnClick(item)}
@@ -73,14 +84,21 @@ function ClientScreen() {
           {item.name}
         </RadioButton>
       ))}
+      <View style={styles.btnContainer}>
+        <TouchableOpacity onPress={redirectToLogin}>
+          <Text style={styles.lkBtnText}>Next</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   app: {
+    marginTop: 30,
+    marginLeft: 15,
     marginHorizontal: 'auto',
-    maxWidth: 500,
+    width: 'auto',
   },
   header: {
     padding: 20,
@@ -90,11 +108,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 5,
+    width: '98%',
   },
   radioButton: {
     height: 20,
     width: 20,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E6E6E6',
@@ -105,16 +124,30 @@ const styles = StyleSheet.create({
     height: 14,
     width: 14,
     borderRadius: 7,
-    backgroundColor: '#98CFB6',
+    backgroundColor: '#000',
   },
   radioButtonText: {
-    fontSize: 16,
+    fontSize: 20,
     marginLeft: 16,
   },
   text: {
     lineHeight: 30,
     fontSize: 20,
-    marginVertical: 5,
+  },
+  btnContainer: {
+    marginTop: 50,
+    width: '20%',
+    alignItems: 'center',
+    borderColor: '#000',
+    borderWidth: 1.5,
+    borderStyle: 'solid',
+    position: 'absolute',
+    right: 50,
+    top: 200,
+  },
+  lkBtnText: {
+    fontSize: 24,
+    fontWeight: '500',
   },
 });
 

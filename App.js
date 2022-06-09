@@ -8,14 +8,14 @@
 
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
+import ClientScreen from './src/ClientScreen';
 import LoginScreen from './src/LoginScreen';
 import Dashboard from './src/Dashboard';
 import OTPVerification from './src/OTPVerification';
 import EmailDetail from './src/Modules/COM/EmailDetail';
 import LicenseDetail from './src/Modules/LIC/LicenseDetail';
-import ClientScreen from './src/ClientScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,11 +23,23 @@ const MyStack = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* <Stack.Screen
-          name="SignUp"
+        <Stack.Screen
+          name="Client Screen"
           component={ClientScreen}
-          options={{headerShown: false}}
-        /> */}
+          options={{
+            title: 'Choose Client',
+            headerStyle: {
+              backgroundColor: '#fff',
+            },
+            headerTitleAlign: 'center',
+            headerTintColor: '#000',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 28,
+              fontFamily: 'Arial Helvetica',
+            },
+          }}
+        />
         {/* <Stack.Screen
           name="EndorsementInfo"
           component={EndorsementInfo}
@@ -43,7 +55,7 @@ const MyStack = () => {
           component={OTPVerification}
           options={{headerShown: false}}
         />
-<Stack.Screen
+        <Stack.Screen
           name="Dashboard"
           component={Dashboard}
           options={{headerShown: false}}
@@ -56,17 +68,17 @@ const MyStack = () => {
             headerStyle: {
               backgroundColor: '#fff',
             },
-            headerTitleAlign:'center',
+            headerTitleAlign: 'center',
             headerTintColor: '#000',
             headerTitleStyle: {
               fontWeight: 'bold',
-              fontSize:28,
+              fontSize: 28,
               fontFamily: 'Arial Helvetica',
             },
           }}
         />
 
-<Stack.Screen
+        <Stack.Screen
           name="EmailDetail"
           component={EmailDetail}
           options={{
@@ -74,16 +86,15 @@ const MyStack = () => {
             headerStyle: {
               backgroundColor: '#fff',
             },
-            headerTitleAlign:'center',
+            headerTitleAlign: 'center',
             headerTintColor: '#000',
             headerTitleStyle: {
               fontWeight: 'bold',
-              fontSize:28,
+              fontSize: 28,
               fontFamily: 'Arial Helvetica',
             },
           }}
         />
-       
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -91,9 +102,7 @@ const MyStack = () => {
 
 export default MyStack;
 
-
 // import type {Node} from 'react';
-
 
 // import {
 //   SafeAreaView,
@@ -147,7 +156,7 @@ export default MyStack;
 // //   };
 
 // //   return (
-    
+
 // //     <SafeAreaView style={backgroundStyle}>
 // //       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 // //       <ScrollView
@@ -197,7 +206,6 @@ export default MyStack;
 // //   },
 // // });
 
-
 // // // const title= styled.h1`
 // // // font-size: 1.5em;
 // // //   text-align: center;
@@ -214,11 +222,8 @@ export default MyStack;
 //          <Text2>Hello Aithent</Text2>
 //        </Container>
 //        </Container>
-       
+
 //      )
 //    }
 //  }
 //  export default App;
-
-
-
