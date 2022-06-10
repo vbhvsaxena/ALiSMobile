@@ -16,7 +16,7 @@ import ResendTimer from './Framework/Wrappers/ResendTimer';
 import VerificationModal from './Framework/Wrappers/VerificationModal';
 
 const OTPVerification = () => {
-  const APIUrl = 'http://172.16.2.142/ALiS3.0_API/api/';
+  const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
 
   const [code, setCode] = useState('');
   const [pinReady, setPinReady] = useState(false);

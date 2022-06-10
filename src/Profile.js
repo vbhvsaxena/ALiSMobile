@@ -20,7 +20,7 @@ const Profile = () => {
   const [UserProfileData, setUserProfileData] = useState(null);
 
   const GetUserProfileData = async () => {
-    await fetch('http://172.16.2.142/ALiS3.0_API/api/Mobile/GetUserProfileData', {
+    await fetch('http://172.16.2.145/ALiS_API/api/Mobile/GetUserProfileData', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',

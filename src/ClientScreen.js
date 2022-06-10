@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
+//Clear Saved Cache Data
 AsyncStorage.clear();
 
 const RadioButton = ({onPress, selected, children}) => {
@@ -24,7 +25,7 @@ const RadioButton = ({onPress, selected, children}) => {
   );
 };
 
-function ClientScreen() {
+ function ClientScreen() {
   const {navigate} = useNavigation();
   const [clientCode, setClientCode] = useState(null);
   const [isLiked, setIsLiked] = useState([
@@ -91,7 +92,7 @@ function ClientScreen() {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   app: {

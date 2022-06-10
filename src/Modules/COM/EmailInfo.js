@@ -7,7 +7,7 @@ const EmailInfo = ({navigation}) => {
     GetEmailsData();
   }, []);
 
-  const APIUrl = 'http://172.16.2.142/ALiS3.0_API/api/';
+  const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
 
   const [EmailData, setEmailData] = useState(null);
 

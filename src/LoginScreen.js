@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomButton from './Framework/Wrappers/CustomButton';
 import CustomTextBox from './Framework/Wrappers/CustomTextBox';
 
-const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
+const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
 //#region Styles
 const styles = StyleSheet.create({
   container: {
