@@ -6,6 +6,8 @@ import {
   Dimensions,
   TouchableOpacity,
   StyleSheet,
+  SafeAreaView,
+  ActivityIndicator
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
@@ -26,6 +28,7 @@ const RadioButton = ({onPress, selected, children}) => {
 };
 
  function ClientScreen() {
+  const [errorMessage,setClientErrorMessage]=useState(null);
   const {navigate} = useNavigation();
   const [clientCode, setClientCode] = useState(null);
   const [isLiked, setIsLiked] = useState([
@@ -54,24 +57,33 @@ const RadioButton = ({onPress, selected, children}) => {
       selected: false,
     },
   ]);
-
+  const [loading,setloading]=useState(false);
   const onRadioBtnClick = item => {
     let updatedState = isLiked.map(isLikedItem =>
       isLikedItem.id === item.id
         ? {...isLikedItem, selected: true}
         : {...isLikedItem, selected: false},
     );
-    AsyncStorage.setItem('ClientName', item.value);
+    setClientErrorMessage(null);
+    AsyncStorage.setItem('clientCode', item.value);
     setIsLiked(updatedState);
   };
 
   const redirectToLogin = () => {
-    AsyncStorage.getItem('ClientName')
+    AsyncStorage.getItem('clientCode')
       .then(res => res)
       .then(val => {
         setClientCode(val);
         console.log('clientCode', clientCode);
-        if (clientCode) navigate('Login');
+        if (clientCode==null){
+          setClientErrorMessage("Please select the client");
+          
+        }
+        else{
+          setloading(true);
+         navigate('Login');
+        
+        }
       });
   };
 
@@ -85,11 +97,21 @@ const RadioButton = ({onPress, selected, children}) => {
           {item.name}
         </RadioButton>
       ))}
-      <View style={styles.btnContainer}>
+       <Text style={styles.errorMessage}>{errorMessage}</Text>
+      <SafeAreaView>
+      {loading?(
+      <ActivityIndicator
+            size={150}
+          />):(
+            <>
+              <View style={styles.btnContainer}>
         <TouchableOpacity onPress={redirectToLogin}>
           <Text style={styles.lkBtnText}>Next</Text>
         </TouchableOpacity>
       </View>
+      </>
+          )}
+      </SafeAreaView>
     </View>
   );
 };
@@ -149,6 +171,15 @@ const styles = StyleSheet.create({
   lkBtnText: {
     fontSize: 24,
     fontWeight: '500',
+  },
+  errorMessage:{
+    fontFamily: 'Kufam-SemiBoldItalic',
+    fontSize: 20,
+    marginBottom: 10,
+    color: '#ff0000',
+  },
+  spinnerTextStyle: {
+    color: '#FFF',
   },
 });
 

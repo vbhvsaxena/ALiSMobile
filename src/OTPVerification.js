@@ -14,10 +14,9 @@ import KeyBoardAvoidingWrapper from './Framework/Wrappers/KeyBoardAvoidingWrappe
 import CodeInputField from './Framework/Wrappers/CodeInputField';
 import ResendTimer from './Framework/Wrappers/ResendTimer';
 import VerificationModal from './Framework/Wrappers/VerificationModal';
+import {APICall} from './API/apiService'
 
 const OTPVerification = () => {
-  // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
-  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
 
   const [code, setCode] = useState('');
   const [pinReady, setPinReady] = useState(false);
@@ -75,104 +74,39 @@ const OTPVerification = () => {
   }, []);
 
   const resendEmail = async () => {
-    await fetch(APIUrl + '/Mobile/ResendOTPDetails', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'false',
-        'Access-Control-Allow-Methods': 'GET,POST',
-        'Access-Control-Allow-Headers':
-          'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-        'Access-Control-Expose-Headers': 'Token',
-        ClientCode: 'NVDPBH',
-        Token: '',
-      },
-      body: JSON.stringify({
+    var _request= JSON.stringify({
         User: JSON.parse(userDetails).User,
-      }),
-    })
-      .then(processResponse)
-      .then(res => {
-        const {statusCode, data} = res;
-
-        console.log('statuscode', statusCode);
-        console.log('data', data);
-
-        if (statusCode == 200) {
-          if (data.ResendOtpDetails_Res?.RecordId > 0) {
-            alert('OTP resend successfully');
-          }
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        return {name: 'network error', description: ''};
       });
-
-    function processResponse(response) {
-      const statusCode = response.status;
-      const data = response.json();
-      return Promise.all([statusCode, data]).then(res => ({
-        statusCode: res[0],
-        data: res[1],
-      }));
-    }
+    APICall('/Mobile/ResendOTPDetails', _request).then(items => {
+      if (items.ResendOtpDetails_Res?.RecordId > 0) {
+        alert('OTP resend successfully');
+      }
+    });
   };
 
   const submitOTPVerification = async () => {
-    await fetch(APIUrl + '/Mobile/VerifyOTPDetails', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'false',
-        'Access-Control-Allow-Methods': 'GET,POST',
-        'Access-Control-Allow-Headers':
-          'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-        'Access-Control-Expose-Headers': 'Token',
-        ClientCode: 'NVDPBH',
-        Token: '',
-      },
-      body: JSON.stringify({
+    var _request= JSON.stringify({
         VerifyOtpDetails_Req: {
           UserId: JSON.parse(userDetails).User.UserId,
           OTP: code,
         },
-      }),
-    })
-      .then(processResponse)
-      .then(res => {
-        const {statusCode, data} = res;
-        console.log(data);
-        if (statusCode == 200) {
-          if (data.VerifyOtpDetails_Res.Verification_Status) {
+      });
+      APICall('/Mobile/VerifyOTPDetails', _request).then(items => {
+        if (items !== null) {
+          if (items.VerifyOtpDetails_Res.Verification_Status) {
             setVerificationSuccessful(true);
             setModalVisible(true);
           } else {
             setVerificationSuccessful(false);
-            setRequestMessage(data.VerifyOtpDetails_Res.StatusMessage);
+            setRequestMessage(items.VerifyOtpDetails_Res.StatusMessage);
             setModalVisible(true);
           }
         } else {
           setVerificationSuccessful(false);
-          setRequestMessage(data.VerifyOtpDetails_Res.StatusMessage);
+          setRequestMessage(items.VerifyOtpDetails_Res.StatusMessage);
           setModalVisible(true);
         }
-      })
-      .catch(error => {
-        console.error(error);
-        return {name: 'network error', description: ''};
       });
-
-    function processResponse(response) {
-      const statusCode = response.status;
-      const data = response.json();
-      return Promise.all([statusCode, data]).then(res => ({
-        statusCode: res[0],
-        data: res[1],
-      }));
-    }
   };
 
   //PERSISTING LOGIN AFTER VERIFICATION

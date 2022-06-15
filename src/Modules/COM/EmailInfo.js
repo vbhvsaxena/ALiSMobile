@@ -1,60 +1,26 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import moment from 'moment';
+import { APICall } from '../../API/apiService';
 
 const EmailInfo = ({navigation}) => {
   useEffect(() => {
     GetEmailsData();
   }, []);
 
-  const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
-  // const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
-
   const [EmailData, setEmailData] = useState(null);
 
   //#region Get Emails Data
   const GetEmailsData = async () => {
-    await fetch(APIUrl + '/Mobile/GetLicensee_EmailDetails', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'false',
-        'Access-Control-Allow-Methods': 'GET,POST',
-        'Access-Control-Allow-Headers':
-          'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-        'Access-Control-Expose-Headers': 'Token',
-        ClientCode: 'NVDPBH',
-        Token: '',
-      },
-      body: JSON.stringify({
+    var _request= JSON.stringify({
         EmailDetails_Req: {
           EntityId: 23119,
         },
-      }),
-    })
-      .then(processResponse)
-      .then(res => {
-        const {statusCode, data} = res;
-
-        console.log('statusCode', statusCode);
-        console.log('data', data);
-
-        if (statusCode == 200 && !!data) setEmailData(data.EmailDetails_Res);
-      })
-      .catch(error => {
-        console.error(error);
-        return {name: 'network error', description: ''};
       });
-
-    function processResponse(response) {
-      const statusCode = response.status;
-      const data = response.json();
-      return Promise.all([statusCode, data]).then(res => ({
-        statusCode: res[0],
-        data: res[1],
-      }));
-    }
+      APICall('Mobile/GetLicensee_EmailDetails',_request).then(items=>{
+        setEmailData(items.EmailDetails_Res);
+      })
+   
   };
 
   const redirection = async EmailLogId => {

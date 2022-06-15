@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import EndorsementInfo from './EndorsementInfo';
+import { APICall } from '../../API/apiService';
 
 const LicenseDetail = () => {
     const route = useRoute();
@@ -17,54 +18,18 @@ const LicenseDetail = () => {
       GetLicenseData();
     }, []);
   
-    // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
-  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
-  
     const [LicenseData, setLicenseData] = useState(null);
   
     const GetLicenseData = async () => {
-      await fetch(APIUrl + '/Mobile/GetLicenseDetails', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': 'false',
-          'Access-Control-Allow-Methods': 'GET,POST',
-          'Access-Control-Allow-Headers':
-            'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-          'Access-Control-Expose-Headers': 'Token',
-          ClientCode: 'NVDPBH',
-          Token: '',
-        },
-        body: JSON.stringify({
+     var _request= JSON.stringify({
           LicenseDetails_Req: {
             LicenseId: route.params.LicenseId,
           },
-        }),
-      })
-        .then(processResponse)
-        .then(res => {
-          const {statusCode, data} = res;
-  
-          console.log('statuscode', statusCode);
-          console.log('data', data);
-  
-          if (statusCode == 200 && !!data)
-            setLicenseData(data.LicenseDetails_Res);
-        })
-        .catch(error => {
-          console.error(error);
-          return {name: 'network error', description: ''};
         });
-  
-      function processResponse(response) {
-        const statusCode = response.status;
-        const data = response.json();
-        return Promise.all([statusCode, data]).then(res => ({
-          statusCode: res[0],
-          data: res[1],
-        }));
-      }
+        APICall('/Mobile/GetLicenseDetails', _request).then(items => {
+          setLicenseData(items.LicenseDetails_Res);
+        });
+        
     };
   
     if (!!LicenseData) {

@@ -20,9 +20,6 @@ const LicenseInfo = ({navigation}) => {
     GetLicenseData();
   }, [CurrentPage]);
 
-  // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
-  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
-
   const [LicenseData, setLicenseData] = useState([]);
   const [CurrentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);

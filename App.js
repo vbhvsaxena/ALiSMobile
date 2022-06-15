@@ -23,7 +23,7 @@ const MyStack = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* <Stack.Screen
+        <Stack.Screen
           name="Client Screen"
           component={ClientScreen}
           options={{
@@ -39,8 +39,8 @@ const MyStack = () => {
               fontFamily: 'Arial Helvetica',
             },
           }}
-        /> */}
-        {/* <Stack.Screen
+        />
+        <Stack.Screen
           name="Login"
           component={LoginScreen}
           options={{headerShown: false}}
@@ -49,7 +49,7 @@ const MyStack = () => {
           name="OtpVerification"
           component={OTPVerification}
           options={{headerShown: false}}
-        /> */}
+        />
         <Stack.Screen
           name="Dashboard"
           component={Dashboard}

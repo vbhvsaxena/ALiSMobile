@@ -8,10 +8,9 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
+import { APICall } from './API/apiService';
 
 const Profile = () => {
-  // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
-  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
 
   useEffect(() => {
     GetUserProfileData();
@@ -21,20 +20,7 @@ const Profile = () => {
   const [UserProfileData, setUserProfileData] = useState(null);
 
   const GetUserProfileData = async () => {
-    await fetch(APIUrl + '/Mobile/GetUserProfileData', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'false',
-        'Access-Control-Allow-Methods': 'GET,POST',
-        'Access-Control-Allow-Headers':
-          'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-        'Access-Control-Expose-Headers': 'Token',
-        ClientCode: 'NVDPBH',
-        Token: '',
-      },
-      body: JSON.stringify({
+   var _request= JSON.stringify({
         LicensedEntity_Req: {
           LicenseeId: 23119,
         },
@@ -43,30 +29,10 @@ const Profile = () => {
           EntityType: 'LSE',
           AddressTypeCode: '',
         },
-      }),
-    })
-      .then(processResponse)
-      .then(res => {
-        const {statusCode, data} = res;
-
-        console.log('statusCode', statusCode);
-        console.log('Profile data', data);
-
-        if (statusCode == 200 && !!data) setUserProfileData(data);
-      })
-      .catch(error => {
-        console.error(error);
-        return {name: 'network error', description: ''};
       });
-
-    function processResponse(response) {
-      const statusCode = response.status;
-      const data = response.json();
-      return Promise.all([statusCode, data]).then(res => ({
-        statusCode: res[0],
-        data: res[1],
-      }));
-    }
+    APICall('Mobile/GetUserProfileData',_request).then(items=>{
+      setUserProfileData(items);
+    })
   };
 
   const OpenAccordionTab = val => {

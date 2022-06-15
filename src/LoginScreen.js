@@ -9,10 +9,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CustomButton from './Framework/Wrappers/CustomButton';
 import CustomTextBox from './Framework/Wrappers/CustomTextBox';
+import {APICall} from './API/apiService';
 
-// const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
-  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
-  
+AsyncStorage.clear();
+
 //#region Styles
 const styles = StyleSheet.create({
   container: {
@@ -64,13 +64,13 @@ export default class LoginScreen extends React.Component {
     super(props);
 
     //#region Check Async Storage exist or not
-    AsyncStorage.getItem('ClientName', (error, result) => {
-      if (error)
-        console.error('Something went wrong!'); //Redirect to Login Page
-      else if (result) {
-        console.log('Getting key was successful', result);
+    AsyncStorage.getItem('clientCode', (error, result) => {
+      if (result ) {
         this.setState({ClientCode: result});
-      } else if (result === null) console.log('Key does not exists!');
+      }
+       else{ 
+        this.props.navigation.navigate('Client Screen');
+      };
       //Redirect to Login Page
     });
     //#endRegion
@@ -101,60 +101,26 @@ export default class LoginScreen extends React.Component {
   }
 
   //#region User Login Method
-  UserLogin = async () => {
-    if (this.validate()) {
-      await fetch(APIUrl + '/Mobile/SignIn', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': 'false',
-          'Access-Control-Allow-Methods': 'GET,POST',
-          'Access-Control-Allow-Headers':
-            'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-          'Access-Control-Expose-Headers': 'Token',
-          ClientCode: this.state.ClientCode,
-          Token: '',
-        },
-        body: JSON.stringify({
+   UserLogin = async () => {
+        var _request= JSON.stringify({
           ValidateUser_Req: {
             UserName: this.state.UserName,
             Password: this.state.Password,
           },
-        }),
-      })
-        .then(processResponse)
-        .then(res => {
-          console.log('ClientCode on Login', this.state.ClientCode);
-          console.log('statusCode', statusCode);
-          const {statusCode, data} = res;
-          // Set User Data in Storage
-          if (statusCode == 200) {
-            if (data.Status === 'Pending') {
-              console.log(data.ValidateUser_Res);
-              this.props.navigation.navigate('OtpVerification');
-              AsyncStorage.setItem(
-                '@UserData',
-                JSON.stringify(data.ValidateUser_Res),
-              );
-            } else {
-              this.setState({UserCredentialsErrorMessage: data.Message});
-            }
-          }
-        })
-        .catch(error => {
-          return {name: 'network error', description: ''};
         });
-
-      function processResponse(response) {
-        const statusCode = response.status;
-        const data = response.json();
-        return Promise.all([statusCode, data]).then(res => ({
-          statusCode: res[0],
-          data: res[1],
-        }));
-      }
-    }
+        APICall('/Mobile/SignIn', _request).then(items => {
+          if (items.Status === 'Pending') {
+           
+            this.props.navigation.navigate('OtpVerification');
+            AsyncStorage.setItem(
+              '@UserData',
+              JSON.stringify(items.ValidateUser_Res),
+            );
+          } else {
+            this.setState({UserCredentialsErrorMessage: items.Message});
+          }
+        });
+     
   };
   //#endRegion
 

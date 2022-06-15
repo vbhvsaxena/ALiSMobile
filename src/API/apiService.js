@@ -1,4 +1,4 @@
-const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
+const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
 
 export const APICall = async (methodName, request) => {
   return await fetch(APIUrl + methodName, {
