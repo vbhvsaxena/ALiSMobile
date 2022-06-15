@@ -1,21 +1,38 @@
+const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
 
+export const APICall = async (methodName, request) => {
+  return await fetch(APIUrl + methodName, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'false',
+      'Access-Control-Allow-Methods': 'GET,POST',
+      'Access-Control-Allow-Headers':
+        'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
+      'Access-Control-Expose-Headers': 'Token',
+      ClientCode: 'NVDPBH',
+      Token: '',
+    },
+    body: request,
+  })
+    .then(processResponse)
+    .then(res => {
+      const {statusCode, data} = res;
 
-export default function APIService(){
+      if (statusCode == 200 && !!data) return data;
+    })
+    .catch(error => {
+      console.error(error);
+      return {name: 'network error', description: ''};
+    });
 
-    await fetch(APIUrl + '/Mobile/SignIn', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': 'false',
-          'Access-Control-Allow-Methods': 'GET,POST',
-          'Access-Control-Allow-Headers':
-            'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-          'Access-Control-Expose-Headers': 'Token',
-          ClientCode: 'NVDPBH',
-          Token: '',
-        }
-      })
-}
-
-// export const APIurl = 'http://172.16.2.142/ALiS3.0_API/api/';
+  function processResponse(response) {
+    const statusCode = response.status;
+    const data = response.json();
+    return Promise.all([statusCode, data]).then(res => ({
+      statusCode: res[0],
+      data: res[1],
+    }));
+  }
+};

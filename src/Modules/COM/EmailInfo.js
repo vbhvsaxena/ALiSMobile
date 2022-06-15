@@ -7,7 +7,8 @@ const EmailInfo = ({navigation}) => {
     GetEmailsData();
   }, []);
 
-  const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
+  const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
+  // const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
 
   const [EmailData, setEmailData] = useState(null);
 

@@ -6,13 +6,14 @@ const EndorsementInfo = ({navigation, headerVisible}) => {
     GetEndorsementData();
   }, []);
 
-  const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
+  // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
+  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
 
   const [EndorsementData, setEndorsementData] = useState(null);
 
   //#region Get License Line Detail Method
   const GetEndorsementData = async () => {
-    await fetch(APIUrl + 'Mobile/GetLicenseLineDetails', {
+    await fetch(APIUrl + '/Mobile/GetLicenseLineDetails', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',

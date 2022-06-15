@@ -13,8 +13,7 @@ export default function CustomTextBox({
   return (
     <View style={styles.inputContainer}>
       <View style={IsShowIcon ? styles.iconStyle : styles.hideIcon}>
-        {/* <AntDesign name={iconType} size={20} color="#666" /> */}
-        <AntDesign name='user' size={20} color="#666"/>
+         <AntDesign name={iconType} size={20} color="#666" />
       </View>
       <TextInput
         value={labelValue}

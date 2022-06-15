@@ -9,9 +9,10 @@ import {
   TextInput,
 } from 'react-native';
 
-
-
 const Profile = () => {
+  // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
+  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
+
   useEffect(() => {
     GetUserProfileData();
     OpenAccordionTab('ENTINF');
@@ -20,7 +21,7 @@ const Profile = () => {
   const [UserProfileData, setUserProfileData] = useState(null);
 
   const GetUserProfileData = async () => {
-    await fetch('http://172.16.2.145/ALiS_API/api/Mobile/GetUserProfileData', {
+    await fetch(APIUrl + '/Mobile/GetUserProfileData', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',

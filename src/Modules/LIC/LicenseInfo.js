@@ -4,11 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  ActivityIndicator,
   PermissionsAndroid,
   Platform,
+  FlatList,
 } from 'react-native';
 import EndorsementInfo from './EndorsementInfo';
+import {APICall} from '../../API/apiService';
 
 // Import RNFetchBlob for the file download
 import RNFetchBlob from 'rn-fetch-blob';
@@ -16,54 +18,35 @@ import RNFetchBlob from 'rn-fetch-blob';
 const LicenseInfo = ({navigation}) => {
   useEffect(() => {
     GetLicenseData();
-  }, []);
+  }, [CurrentPage]);
 
-  const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
+  // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
+  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
 
-  const [LicenseData, setLicenseData] = useState(null);
+  const [LicenseData, setLicenseData] = useState([]);
+  const [CurrentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [ViewEndorsement, setViewEndorsement] = useState(false);
 
   //#region Get License Detail Method
   const GetLicenseData = async () => {
-    await fetch(APIUrl + '/Mobile/GetLicensee_LicenseDetails', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'false',
-        'Access-Control-Allow-Methods': 'GET,POST',
-        'Access-Control-Allow-Headers':
-          'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
-        'Access-Control-Expose-Headers': 'Token',
-        ClientCode: 'NVDPBH',
-        Token: '',
+    setIsLoading(true);
+    console.log('CurrentPage', CurrentPage);
+    console.log('isLoading', isLoading);
+
+    var _request = JSON.stringify({
+      LicenseDetails_Req: {
+        LicenseeId: 23119,
+        Page_No: CurrentPage,
       },
-      body: JSON.stringify({
-        LicenseDetails_Req: {
-          LicenseeId: 23119,
-        },
-      }),
-    })
-      .then(processResponse)
-      .then(res => {
-        const {statusCode, data} = res;
+    });
 
-        if (statusCode == 200 && !!data)
-          setLicenseData(data.LicenseDetails_Res.License);
-      })
-      .catch(error => {
-        console.error(error);
-        return {name: 'network error', description: ''};
-      });
+    console.log(_request);
 
-    function processResponse(response) {
-      const statusCode = response.status;
-      const data = response.json();
-      return Promise.all([statusCode, data]).then(res => ({
-        statusCode: res[0],
-        data: res[1],
-      }));
-    }
+    APICall('/Mobile/GetLicensee_LicenseDetails', _request).then(items => {
+      setLicenseData(items.LicenseDetails_Res.License);
+      setIsLoading(false);
+    });
   };
 
   const redirection = async licenseId => {
@@ -159,114 +142,114 @@ const LicenseInfo = ({navigation}) => {
     // navigation.navigate('LicenseDetail', {LicenseId: licenseId});
   };
 
-  //#endRegion
-  if (LicenseData != null) {
+  // Create License Html Card Design
+  const renderItem = ({item}) => {
     return (
-      <ScrollView>
-        {LicenseData.map((item, index) => {
-          // main Wrapper
-          return (
+      <TouchableOpacity onPress={redirection.bind(this, item.LicenseId)}>
+        <View style={styles.mainContainer}>
+          <View style={styles.firstRow}>
+            <View style={styles.descriptionContainer}>
+              {/* License Description */}
+              <Text style={styles.lblDescription}>{item.Description}</Text>
+              {/* License Number Field*/}
+              <Text style={styles.lblLicenseNumber}>
+                {!!item.LicenseNumberToDisplay
+                  ? item.LicenseNumberToDisplay
+                  : item.LicenseNumber}
+              </Text>
+            </View>
+
+            <View style={styles.expiryDateContainer}>
+              {/* Expiry Date Field */}
+              <Text style={styles.lblExpiryDate}>Exp. Date</Text>
+              {/* Expiry Date Value */}
+              <Text style={styles.ValExpiryDate}>
+                {!!item.ExpiryDate ? item.ExpiryDate : 'NA'}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.secondRow}>
+            {/* Business Unit Field */}
+            <View style={styles.businessUnitContainer}>
+              {/* Business Unit Label */}
+              <Text style={styles.lblBusinessUnit}>Business Unit</Text>
+              {/* Business Unit Value */}
+              <Text style={styles.ValBusinessUnit}>{item.BusinessUnit}</Text>
+            </View>
+
+            {/* Status Field */}
+            <View style={styles.statusContainer}>
+              {/* Status Label */}
+              <Text style={styles.lblStatus}>Status</Text>
+              {/* Status Value */}
+              <Text style={styles.ValStatus}>{item.StatusDescription}</Text>
+            </View>
+          </View>
+          {/* Restriction Text Row */}
+          <View style={styles.thirdRow}>
+            <View>
+              {/* Restriction Text Label */}
+              <Text style={styles.lblRestrictionText}>Restriction Text</Text>
+              {/* Restriction Text Value */}
+              <Text style={styles.ValRestrictionText}>
+                {!!item.RestrictionText ? item.RestrictionText : 'NA'}
+              </Text>
+            </View>
+          </View>
+          {/* Links Row */}
+          <View style={styles.forthRow}>
+            {/* View Endorsement Link */}
             <TouchableOpacity
-              key={index}
-              onPress={redirection.bind(this, item.LicenseId)}>
-              <View style={styles.mainContainer}>
-                <View style={styles.firstRow}>
-                  <View style={styles.descriptionContainer}>
-                    {/* License Description */}
-                    <Text style={styles.lblDescription}>
-                      {item.Description}
-                    </Text>
-                    {/* License Number Field*/}
-                    <Text style={styles.lblLicenseNumber}>
-                      {!!item.LicenseNumberToDisplay
-                        ? item.LicenseNumberToDisplay
-                        : item.LicenseNumber}
-                    </Text>
-                  </View>
-
-                  <View style={styles.expiryDateContainer}>
-                    {/* Expiry Date Field */}
-                    <Text style={styles.lblExpiryDate}>Exp. Date</Text>
-                    {/* Expiry Date Value */}
-                    <Text style={styles.ValExpiryDate}>
-                      {!!item.ExpiryDate ? item.ExpiryDate : 'NA'}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.secondRow}>
-                  {/* Business Unit Field */}
-                  <View style={styles.businessUnitContainer}>
-                    {/* Business Unit Label */}
-                    <Text style={styles.lblBusinessUnit}>Business Unit</Text>
-                    {/* Business Unit Value */}
-                    <Text style={styles.ValBusinessUnit}>
-                      {item.BusinessUnit}
-                    </Text>
-                  </View>
-
-                  {/* Status Field */}
-                  <View style={styles.statusContainer}>
-                    {/* Status Label */}
-                    <Text style={styles.lblStatus}>Status</Text>
-                    {/* Status Value */}
-                    <Text style={styles.ValStatus}>
-                      {item.StatusDescription}
-                    </Text>
-                  </View>
-                </View>
-                {/* Restriction Text Row */}
-                <View style={styles.thirdRow}>
-                  <View>
-                    {/* Restriction Text Label */}
-                    <Text style={styles.lblRestrictionText}>
-                      Restriction Text
-                    </Text>
-                    {/* Restriction Text Value */}
-                    <Text style={styles.ValRestrictionText}>
-                      {!!item.RestrictionText ? item.RestrictionText : 'NA'}
-                    </Text>
-                  </View>
-                </View>
-                {/* Links Row */}
-                <View style={styles.forthRow}>
-                  {/* View Endorsement Link */}
-                  <TouchableOpacity
-                    style={styles.LinkContainer}
-                    onPress={viewEndorsement}>
-                    {ViewEndorsement ? (
-                      <Text style={styles.EndorsementLink}>
-                        Hide Endorsement
-                      </Text>
-                    ) : (
-                      <Text style={styles.EndorsementLink}>
-                        View Endorsement
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                  {/* Print License Link */}
-                  <TouchableOpacity
-                    style={styles.LinkContainer}
-                    onPress={checkPermission}>
-                    <Text style={styles.PrintLicenseLink}>Print License</Text>
-                  </TouchableOpacity>
-                </View>
-                {ViewEndorsement ? (
-                  <View>
-                    <EndorsementInfo headerVisible={true}></EndorsementInfo>
-                  </View>
-                ) : null}
-              </View>
+              style={styles.LinkContainer}
+              onPress={viewEndorsement}>
+              {ViewEndorsement ? (
+                <Text style={styles.EndorsementLink}>Hide Endorsement</Text>
+              ) : (
+                <Text style={styles.EndorsementLink}>View Endorsement</Text>
+              )}
             </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+            {/* Print License Link */}
+            <TouchableOpacity
+              style={styles.LinkContainer}
+              onPress={checkPermission}>
+              <Text style={styles.PrintLicenseLink}>Print License</Text>
+            </TouchableOpacity>
+          </View>
+          {ViewEndorsement ? (
+            <View>
+              <EndorsementInfo headerVisible={true}></EndorsementInfo>
+            </View>
+          ) : null}
+        </View>
+      </TouchableOpacity>
     );
-  } else
+  };
+
+  //Load Next Paging Data
+  const loadMoreItem = () => {
+    console.log('loadMoreItem start ----', CurrentPage + 1);
+    setCurrentPage(CurrentPage + 1);
+    console.log('loadMoreItem end ----', CurrentPage);
+  };
+
+  //Create Loader
+  const renderLoader = () => {
     return (
-      <View>
-        <Text>No Record Found</Text>
+      <View style={{marginVertical: 200, alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#aaa"></ActivityIndicator>
       </View>
     );
+  };
+  //#endRegion
+  return (
+    <FlatList
+      data={LicenseData}
+      renderItem={renderItem}
+      keyExtractor={(item,index) => index.toString()}
+      onEndReached={loadMoreItem}
+      onEndReachedThreshold={0}
+      ListFooterComponent={renderLoader}></FlatList>
+  );
 };
 
 const styles = StyleSheet.create({

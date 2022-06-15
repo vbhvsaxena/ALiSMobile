@@ -17,7 +17,8 @@ const LicenseDetail = () => {
       GetLicenseData();
     }, []);
   
-    const APIUrl = 'http://172.16.2.145/ALiS_API/api/';
+    // const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
+  const APIUrl = 'http://192.168.1.44/ALiS_API/api/';
   
     const [LicenseData, setLicenseData] = useState(null);
   
