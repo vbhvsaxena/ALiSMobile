@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity,FlatList} from 'react-native';
 import moment from 'moment';
-import { APICall } from '../../API/apiService';
+import {APICall} from '../../API/apiService';
+import {checkPermission} from '../../Framework/DownloadFile';
 
 const ApplicationInfo = () => {
   useEffect(() => {
@@ -12,20 +13,20 @@ const ApplicationInfo = () => {
 
   //#region Get Application Data
   const GetApplicationData = async () => {
-   var _request= JSON.stringify({
-        Applications_Req: {
-          EntityId: 23119,
-        },
-      });
-    APICall('Mobile/GetLicensee_ApplicationDetails',_request).then(items =>{
+    var _request = JSON.stringify({
+      Applications_Req: {
+        EntityId: 23119,
+      },
+    });
+    APICall('Mobile/GetLicensee_ApplicationDetails', _request).then(items => {
       setApplicationData(items.ApplicationDetails_Res);
-    })
+    });
   };
 
-  if (ApplicationData != null) {
-    return ApplicationData.map((item, index) => {
-      return (
-        <View
+  // create Application Info Data
+  const renderItem=({index})=>{
+    return(
+       <View
           key={index}
           style={{
             backgroundColor: '#fff',
@@ -40,6 +41,7 @@ const ApplicationInfo = () => {
             borderStyle: 'solid',
             borderWidth: 1,
           }}>
+            
           {/* Application Type */}
           <View style={{flexDirection: 'row', width: '100%'}}>
             <Text style={{fontSize: 20, fontWeight: 'bold'}}>
@@ -81,16 +83,31 @@ const ApplicationInfo = () => {
               {ApplicationData[index].StatusDescription}
             </Text>
           </View>
+          {/*onPress={checkPermission}*/}
+          <TouchableOpacity
+            style={{width: '50%', flexDirection: 'row'}}
+            onPress={checkPermission}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#809fff',
+                textDecorationLine: 'underline',
+                textAlign: 'right',
+              }}>
+              Print Summary
+            </Text>
+          </TouchableOpacity>
         </View>
-      );
-    });
-  } else {
-    return (
-      <View>
-        <Text>No Data found.</Text>
-      </View>
-    );
+        )
   }
+      return (
+        <FlatList
+        data={ApplicationData}
+        renderItem={renderItem}>
+        </FlatList>
+      );
+    
 };
 
 export default ApplicationInfo;
