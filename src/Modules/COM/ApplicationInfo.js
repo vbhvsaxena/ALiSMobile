@@ -1,96 +1,159 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import moment from 'moment';
-import { APICall } from '../../API/apiService';
+import {APICall} from '../../API/apiService';
+import {PDFDownload} from '../../Framework/Helpers/FileDownload';
 
 const ApplicationInfo = () => {
+  const [CurrentPage, setCurrentPage] = useState(1);
+  let stopFetchMore = true;
+
   useEffect(() => {
     GetApplicationData();
-  }, []);
+  }, [CurrentPage]);
 
-  const [ApplicationData, setApplicationData] = useState(null);
+  const [ApplicationData, setApplicationData] = useState([]);
 
   //#region Get Application Data
   const GetApplicationData = async () => {
-   var _request= JSON.stringify({
-        Applications_Req: {
-          EntityId: 23119,
-        },
-      });
-    APICall('Mobile/GetLicensee_ApplicationDetails',_request).then(items =>{
-      setApplicationData(items.ApplicationDetails_Res);
-    })
+    var _request = JSON.stringify({
+      Applications_Req: {
+        EntityId: 23119,
+        Page_No: CurrentPage,
+      },
+    });
+    APICall('/Mobile/GetLicensee_ApplicationDetails', _request).then(items => {
+      if (items.ApplicationDetails_Res)
+        setApplicationData(
+          ApplicationData.concat(items.ApplicationDetails_Res),
+        );
+      else stopFetchMore = false;
+    });
   };
+  //#endRegion
 
-  if (ApplicationData != null) {
-    return ApplicationData.map((item, index) => {
-      return (
-        <View
-          key={index}
-          style={{
-            backgroundColor: '#fff',
-            alignSelf: 'center',
-            marginTop: 20,
-            width: '90%',
-            height: 'auto',
-            borderRadius: 0,
-            fontFamily: 'Kufam-SemiBoldItalic',
-            padding: 10,
-            borderColor: 'black',
-            borderStyle: 'solid',
-            borderWidth: 1,
-          }}>
-          {/* Application Type */}
-          <View style={{flexDirection: 'row', width: '100%'}}>
+  //#region PDF Download Code
+  const printApplicationSummary = async () => {
+    var _request = JSON.stringify({
+      DocumentId: '412246',
+      ApplicationId: 26436,
+      ReferenceType: 'APP',
+      UserId: 1,
+    });
+    await APICall('/Mobile/CreateApplicationSummary', _request).then(
+      fileData => {
+        console.log(fileData.PDFDocumentUrl);
+        if (fileData.IsPdfGenerate) PDFDownload(fileData.PDFDocumentUrl);
+        else console.log(fileData.ErrorMessage);
+      },
+    );
+  };
+  //#endRegion
+
+  // Create Application Html Card Design
+  const renderItem = ({item}) => {
+    return (
+      <View
+        style={{
+          backgroundColor: '#fff',
+          alignSelf: 'center',
+          marginTop: 20,
+          width: '90%',
+          height: 'auto',
+          borderRadius: 0,
+          fontFamily: 'Kufam-SemiBoldItalic',
+          padding: 10,
+          borderColor: 'black',
+          borderStyle: 'solid',
+          borderWidth: 1,
+        }}>
+        {/* Application Type */}
+        <View style={{flexDirection: 'row', width: '100%'}}>
+          <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+            {item.ApplicationTypeDescription}
+          </Text>
+        </View>
+        {/* Transaction No && Application Date */}
+        <View style={{flexDirection: 'row', width: '100%', marginTop: 10}}>
+          {/* Transaction Number Field */}
+          <View style={{marginLeft: 0, width: '60%'}}>
+            {/* Transaction Number Label */}
+            <Text style={{fontSize: 18}}>Application No.</Text>
+            {/* Transaction Number Value */}
             <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-              {ApplicationData[index].ApplicationTypeDescription}
+              {item.TransactionNo}
             </Text>
           </View>
-          {/* Transaction No && Application Date */}
-          <View style={{flexDirection: 'row', width: '100%', marginTop: 10}}>
-            {/* Transaction Number Field */}
-            <View style={{marginLeft: 0, width: '60%'}}>
-              {/* Transaction Number Label */}
-              <Text style={{fontSize: 18}}>Application No.</Text>
-              {/* Transaction Number Value */}
-              <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-                {ApplicationData[index].TransactionNo}
-              </Text>
-            </View>
 
-            {/* Application Date Field */}
-            <View style={{width: '40%'}}>
-              {/* Application Date Label */}
-              <Text style={{textAlign: 'right', fontSize: 18}}>Start Date</Text>
-              {/* Application Date Value */}
-              <Text
-                style={{textAlign: 'right', fontSize: 20, fontWeight: 'bold'}}>
-                {moment(ApplicationData[index].CreatedDate).format(
-                  'MM/DD/YYYY',
-                )}
-              </Text>
-            </View>
-          </View>
-          {/* Application Status Label */}
-          <View style={{flexDirection: 'row', width: '100%', marginTop: 15}}>
-            <Text style={{textAlign: 'right', fontSize: 18}}>Status</Text>
-          </View>
-          {/* Application Status Value */}
-          <View style={{flexDirection: 'row', width: '100%'}}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-              {ApplicationData[index].StatusDescription}
+          {/* Application Date Field */}
+          <View style={{width: '40%'}}>
+            {/* Application Date Label */}
+            <Text style={{textAlign: 'right', fontSize: 18}}>Start Date</Text>
+            {/* Application Date Value */}
+            <Text
+              style={{textAlign: 'right', fontSize: 20, fontWeight: 'bold'}}>
+              {moment(item.CreatedDate).format('MM/DD/YYYY')}
             </Text>
           </View>
         </View>
-      );
-    });
-  } else {
-    return (
-      <View>
-        <Text>No Data found.</Text>
+
+        <View style={{flexDirection: 'row', width: '100%', marginTop: 10}}>
+          {/* Application Status Label */}
+          <View style={{marginLeft: 0, width: '60%'}}>
+            {/* Status Label */}
+            <Text style={{fontSize: 18}}>Status</Text>
+            {/* Status Value */}
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+              {item.StatusDescription}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={printApplicationSummary}
+            style={{width: '40%'}}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#809fff',
+                textDecorationLine: 'underline',
+              }}>
+              Print Application
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
-  }
+  };
+
+  //Load Next Paging Data
+  const loadMoreItem = () => {
+    if (stopFetchMore) setCurrentPage(CurrentPage + 1);
+  };
+
+  //Create Loader
+  const renderLoader = () => {
+    return stopFetchMore ? (
+      <View style={{marginVertical: 20, alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#aaa"></ActivityIndicator>
+      </View>
+    ) : null;
+  };
+
+  return (
+    <FlatList
+      data={ApplicationData}
+      renderItem={renderItem}
+      keyExtractor={(item, index) => index.toString()}
+      onEndReached={loadMoreItem}
+      ListFooterComponent={renderLoader}></FlatList>
+  );
 };
 
 export default ApplicationInfo;

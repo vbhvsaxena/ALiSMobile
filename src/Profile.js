@@ -30,7 +30,7 @@ const Profile = () => {
           AddressTypeCode: '',
         },
       });
-    APICall('Mobile/GetUserProfileData',_request).then(items=>{
+    APICall('/Mobile/GetUserProfileData',_request).then(items=>{
       setUserProfileData(items);
     })
   };

@@ -1,10 +1,5 @@
-import React, {useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  Image,
-  Text,
-} from 'react-native';
+import React from 'react';
+import {View, StyleSheet, Image, Text} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CustomButton from './Framework/Wrappers/CustomButton';
@@ -65,12 +60,11 @@ export default class LoginScreen extends React.Component {
 
     //#region Check Async Storage exist or not
     AsyncStorage.getItem('clientCode', (error, result) => {
-      if (result ) {
+      if (result) {
         this.setState({ClientCode: result});
-      }
-       else{ 
+      } else {
         this.props.navigation.navigate('Client Screen');
-      };
+      }
       //Redirect to Login Page
     });
     //#endRegion
@@ -101,26 +95,24 @@ export default class LoginScreen extends React.Component {
   }
 
   //#region User Login Method
-   UserLogin = async () => {
-        var _request= JSON.stringify({
-          ValidateUser_Req: {
-            UserName: this.state.UserName,
-            Password: this.state.Password,
-          },
-        });
-        APICall('/Mobile/SignIn', _request).then(items => {
-          if (items.Status === 'Pending') {
-           
-            this.props.navigation.navigate('OtpVerification');
-            AsyncStorage.setItem(
-              '@UserData',
-              JSON.stringify(items.ValidateUser_Res),
-            );
-          } else {
-            this.setState({UserCredentialsErrorMessage: items.Message});
-          }
-        });
-     
+  UserLogin = async () => {
+    var _request = JSON.stringify({
+      ValidateUser_Req: {
+        UserName: this.state.UserName,
+        Password: this.state.Password,
+      },
+    });
+    APICall('/Mobile/SignIn', _request).then(items => {
+      if (items.Status === 'Pending') {
+        this.props.navigation.navigate('OtpVerification');
+        AsyncStorage.setItem(
+          '@UserData',
+          JSON.stringify(items.ValidateUser_Res),
+        );
+      } else {
+        this.setState({UserCredentialsErrorMessage: items.Message});
+      }
+    });
   };
   //#endRegion
 

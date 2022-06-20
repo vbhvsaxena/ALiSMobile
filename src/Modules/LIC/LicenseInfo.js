@@ -5,32 +5,52 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  PermissionsAndroid,
-  Platform,
+  BackHandler,
+  Alert,
   FlatList,
 } from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
+
 import EndorsementInfo from './EndorsementInfo';
 import {APICall} from '../../API/apiService';
-
-// Import RNFetchBlob for the file download
-import RNFetchBlob from 'rn-fetch-blob';
+import {PDFDownload} from '../../Framework/Helpers/FileDownload';
 
 const LicenseInfo = ({navigation}) => {
+  const [LicenseData, setLicenseData] = useState([]);
+  const [CurrentPage, setCurrentPage] = useState(1);
+  const [ViewEndorsement, setViewEndorsement] = useState(false);
+
+  let stopFetchMore = true;
+
+  //#region Code used to Handle the back button
+  const backAction = () => {
+    Alert.alert('Are You Sure', 'you want to exit?', [
+      {
+        text: 'Cancel',
+        onPress: () => null,
+        style: 'cancel',
+      },
+      {text: 'YES', onPress: () => BackHandler.exitApp()},
+    ]);
+    return true;
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', backAction);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', backAction);
+    }, []),
+  );
+  //#endRegion
+
   useEffect(() => {
     GetLicenseData();
   }, [CurrentPage]);
 
-  const [LicenseData, setLicenseData] = useState([]);
-  const [CurrentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [ViewEndorsement, setViewEndorsement] = useState(false);
-
   //#region Get License Detail Method
   const GetLicenseData = async () => {
-    setIsLoading(true);
-    console.log('CurrentPage', CurrentPage);
-    console.log('isLoading', isLoading);
-
     var _request = JSON.stringify({
       LicenseDetails_Req: {
         LicenseeId: 23119,
@@ -38,12 +58,17 @@ const LicenseInfo = ({navigation}) => {
       },
     });
 
-    console.log(_request);
+    console.log('Load Request', _request);
 
-    APICall('/Mobile/GetLicensee_LicenseDetails', _request).then(items => {
-      setLicenseData(items.LicenseDetails_Res.License);
-      setIsLoading(false);
-    });
+    await APICall('/Mobile/GetLicensee_LicenseDetails', _request).then(
+      licData => {
+        if (licData.LicenseDetails_Res)
+          setLicenseData(
+            LicenseData.concat(licData.LicenseDetails_Res.License),
+          );
+        else stopFetchMore = false;
+      },
+    );
   };
 
   const redirection = async licenseId => {
@@ -56,88 +81,23 @@ const LicenseInfo = ({navigation}) => {
   };
 
   //#region PDF Download Code
-  const fileUrl =
-    'http://172.16.2.73/ALiSTemplates/CLL_License_Certificate_CLL_237_06062022154649.pdf';
-
-  const checkPermission = async () => {
-    // Function to check the platform
-    // If Platform is Android then check for permissions.
-
-    if (Platform.OS === 'ios') {
-      downloadFile();
-    } else {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message:
-              'Application needs access to your storage to download File',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          // Start downloading
-          downloadFile();
-          console.log('Storage Permission Granted.');
-        } else {
-          // If permission denied then show alert
-          Alert.alert('Error', 'Storage Permission Not Granted');
-        }
-      } catch (err) {
-        // To handle permission related exception
-        console.log('++++' + err);
-      }
-    }
-  };
-
-  const downloadFile = () => {
-    // Get today's date to add the time suffix in filename
-    let date = new Date();
-    // File URL which we want to download
-    let FILE_URL = fileUrl;
-    // Function to get extention of the file url
-    let file_ext = getFileExtention(FILE_URL);
-
-    file_ext = '.' + file_ext[0];
-
-    // config: To get response by passing the downloading related options
-    // fs: Root directory path to download
-    const {config, fs} = RNFetchBlob;
-    let RootDir = fs.dirs.PictureDir;
-    let options = {
-      fileCache: true,
-      addAndroidDownloads: {
-        path:
-          RootDir +
-          '/file_' +
-          Math.floor(date.getTime() + date.getSeconds() / 2) +
-          file_ext,
-        description: 'downloading file...',
-        notification: true,
-        // useDownloadManager works with Android only
-        useDownloadManager: true,
+  const printLicense = async () => {
+    var _request = JSON.stringify({
+      CredentialInfo_Req: {
+        LicenseId: 40222,
+        UserId: 38547,
+        PrefNameOnLicPrnt: 'Y',
       },
-    };
-    config(options)
-      .fetch('GET', FILE_URL)
-      .then(res => {
-        // Alert after successful downloading
-        console.log('res -> ', JSON.stringify(res));
-        alert('File Downloaded Successfully.');
-      });
+    });
+    await APICall('/Mobile/GenerateLicenseTemplate', _request).then(
+      fileData => {
+        console.log(fileData.PdfFileName);
+        if (fileData.IsPdfGenerate) PDFDownload(fileData.PdfFileName);
+        else console.log(fileData.Message);
+      },
+    );
   };
-
-  const getFileExtention = fileUrl => {
-    // To get the file extension
-    return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
-  };
-
   //#endRegion
-
-  const printLicense = () => {
-    alert('Print License');
-    // navigation.navigate('LicenseDetail', {LicenseId: licenseId});
-  };
 
   // Create License Html Card Design
   const renderItem = ({item}) => {
@@ -208,7 +168,7 @@ const LicenseInfo = ({navigation}) => {
             {/* Print License Link */}
             <TouchableOpacity
               style={styles.LinkContainer}
-              onPress={checkPermission}>
+              onPress={printLicense}>
               <Text style={styles.PrintLicenseLink}>Print License</Text>
             </TouchableOpacity>
           </View>
@@ -224,27 +184,25 @@ const LicenseInfo = ({navigation}) => {
 
   //Load Next Paging Data
   const loadMoreItem = () => {
-    console.log('loadMoreItem start ----', CurrentPage + 1);
-    setCurrentPage(CurrentPage + 1);
-    console.log('loadMoreItem end ----', CurrentPage);
+    console.log(stopFetchMore);
+    if (stopFetchMore) setCurrentPage(CurrentPage + 1);
   };
 
   //Create Loader
   const renderLoader = () => {
-    return (
-      <View style={{marginVertical: 200, alignItems: 'center'}}>
+    return stopFetchMore ? (
+      <View style={{marginVertical: 20, alignItems: 'center'}}>
         <ActivityIndicator size="large" color="#aaa"></ActivityIndicator>
       </View>
-    );
+    ) : null;
   };
   //#endRegion
   return (
     <FlatList
       data={LicenseData}
       renderItem={renderItem}
-      keyExtractor={(item,index) => index.toString()}
+      keyExtractor={(item, index) => index.toString()}
       onEndReached={loadMoreItem}
-      onEndReachedThreshold={0}
       ListFooterComponent={renderLoader}></FlatList>
   );
 };

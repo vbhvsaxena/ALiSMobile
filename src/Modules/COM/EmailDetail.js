@@ -23,7 +23,7 @@ const EmailDetail = () => {
           EmailLogId: route.params.EmailLogId,
         },
       });
-      APICall('Mobile/GetEmailLogDetails',_request).then(items=>{
+      APICall('/Mobile/GetEmailLogDetails',_request).then(items=>{
         setEmailData(items.EmailDetails_Res);
       })
    
