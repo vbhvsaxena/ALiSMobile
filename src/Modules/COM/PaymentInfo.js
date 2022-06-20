@@ -35,22 +35,20 @@ const PaymentInfo = () => {
     });
   };
 
-   //#region PDF Download Code
-   const printPaymentReceipt = async () => {
+  //#region PDF Download Code
+  const printPaymentReceipt = async () => {
     var _request = JSON.stringify({
       ClientCode: 'NVDPBH',
       ApplicationId: 45590,
       CredentialHash: 'Credential Number',
-      UserName:'Vaibhav Saxena',
+      UserName: 'Vaibhav Saxena',
       UserId: 1,
     });
-    await APICall('/Mobile/CreatePaymentReceipt', _request).then(
-      fileData => {
-        console.log(fileData.PDFDocumentUrl);
-        if (fileData.IsPdfGenerate) PDFDownload(fileData.PDFDocumentUrl);
-        else console.log(fileData.ErrorMessage);
-      },
-    );
+    await APICall('/Mobile/CreatePaymentReceipt', _request).then(fileData => {
+      console.log(fileData.PDFDocumentUrl);
+      if (fileData.IsPdfGenerate) PDFDownload(fileData.PDFDocumentUrl);
+      else console.log(fileData.ErrorMessage);
+    });
   };
   //#endRegion
 
@@ -119,19 +117,17 @@ const PaymentInfo = () => {
           </View>
         </View>
 
-        <TouchableOpacity
-            onPress={printPaymentReceipt}
-            style={{width: '40%'}}>
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: 'bold',
-                color: '#809fff',
-                textDecorationLine: 'underline',
-              }}>
-              Print Receipt
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={printPaymentReceipt} style={{width: '40%'}}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: '#809fff',
+              textDecorationLine: 'underline',
+            }}>
+            Print Receipt
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
