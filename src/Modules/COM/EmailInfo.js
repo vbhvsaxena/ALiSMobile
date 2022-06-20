@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {APICall} from '../../API/apiService';
+import moment from 'moment';
 
 const EmailInfo = ({navigation}) => {
   const [CurrentPage, setCurrentPage] = useState(1);

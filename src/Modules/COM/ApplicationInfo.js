@@ -86,32 +86,46 @@ const ApplicationInfo = () => {
             {/* Transaction Number Label */}
             <Text style={{fontSize: 18}}>Application No.</Text>
             {/* Transaction Number Value */}
-            <View style={{flexDirection: 'row', width: '100%', marginTop: 10}}>
-              {/* Application Status Label */}
-              <View style={{marginLeft: 0, width: '60%'}}>
-                {/* Status Label */}
-                <Text style={{fontSize: 18}}>Status</Text>
-                {/* Status Value */}
-                <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-                  {item.StatusDescription}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={printApplicationSummary}
-                style={{width: '40%'}}>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 'bold',
-                    color: '#809fff',
-                    textDecorationLine: 'underline',
-                  }}>
-                  Print Application
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+              {item.TransactionNo}
+            </Text>
           </View>
+          {/* Application Date Field */}
+          <View style={{width: '40%'}}>
+            {/* Application Date Label */}
+            <Text style={{textAlign: 'right', fontSize: 18}}>Start Date</Text>
+            {/* Application Date Value */}
+            <Text
+              style={{textAlign: 'right', fontSize: 20, fontWeight: 'bold'}}>
+              {moment(item.CreatedDate).format('MM/DD/YYYY')}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{flexDirection: 'row', width: '100%', marginTop: 10}}>
+          {/* Application Status Label */}
+          <View style={{marginLeft: 0, width: '60%'}}>
+            {/* Status Label */}
+            <Text style={{fontSize: 18}}>Status</Text>
+            {/* Status Value */}
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+              {item.StatusDescription}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={printApplicationSummary}
+            style={{width: '40%'}}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#809fff',
+                textDecorationLine: 'underline',
+              }}>
+              Print Application
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
