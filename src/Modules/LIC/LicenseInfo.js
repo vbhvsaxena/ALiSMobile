@@ -9,6 +9,7 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import moment from 'moment';
 import EndorsementInfo from './EndorsementInfo';
@@ -19,6 +20,7 @@ const LicenseInfo = ({navigation}) => {
   const [LicenseData, setLicenseData] = useState([]);
   const [CurrentPage, setCurrentPage] = useState(1);
   const [ViewEndorsement, setViewEndorsement] = useState(false);
+  
 
   let stopFetchMore = true;
 
@@ -49,56 +51,55 @@ const LicenseInfo = ({navigation}) => {
     GetLicenseData();
   }, [CurrentPage]);
 
-  //#region Get License Detail Method
   const GetLicenseData = async () => {
+    const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       LicenseDetails_Req: {
-        LicenseeId: 23119,
+        LicenseeId: JSON.parse(data).UserEntityMapping.EntityId,
         Page_No: CurrentPage,
       },
     });
-
-    console.log('Load Request', _request);
-
     await APICall('/Mobile/GetLicensee_LicenseDetails', _request).then(
       licData => {
-        if (licData.LicenseDetails_Res)
+        if (licData.LicenseDetails_Res){
           setLicenseData(
             LicenseData.concat(licData.LicenseDetails_Res.License),
           );
+        }
         else stopFetchMore = false;
       },
     );
   };
-
   const redirection = async licenseId => {
     navigation.navigate('LicenseDetail', {LicenseId: licenseId});
   };
 
   const viewEndorsement = () => {
-    if (ViewEndorsement) setViewEndorsement(false);
+    if (viewEndorsement) {
+      setViewEndorsement(false)
+    }
     else setViewEndorsement(true);
   };
 
   //#region PDF Download Code
-  const printLicense = async () => {
+  const printLicense = async (LicenseId) => {
+    const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       CredentialInfo_Req: {
-        LicenseId: 40222,
-        UserId: 38547,
+        LicenseId: LicenseId,
+        UserId: JSON.parse(data).User.UserId,
         PrefNameOnLicPrnt: 'Y',
       },
     });
     await APICall('/Mobile/GenerateLicenseTemplate', _request).then(
       fileData => {
-        console.log(fileData.PdfFileName);
+        
         if (fileData.IsPdfGenerate) PDFDownload(fileData.PdfFileName);
         else console.log(fileData.Message);
       },
     );
   };
   //#endRegion
-
   // Create License Html Card Design
   const renderItem = ({item}) => {
     return (
@@ -168,11 +169,11 @@ const LicenseInfo = ({navigation}) => {
             {/* Print License Link */}
             <TouchableOpacity
               style={styles.LinkContainer}
-              onPress={printLicense}>
+              onPress={printLicense.bind(this,item.LicenseId)}>
               <Text style={styles.PrintLicenseLink}>Print License</Text>
             </TouchableOpacity>
           </View>
-          {ViewEndorsement ? (
+          {ViewEndorsement  ? (
             <View>
               <EndorsementInfo headerVisible={true}></EndorsementInfo>
             </View>

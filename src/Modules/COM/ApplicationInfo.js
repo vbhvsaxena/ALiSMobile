@@ -9,6 +9,7 @@ import {
 import moment from 'moment';
 import {APICall} from '../../API/apiService';
 import {PDFDownload} from '../../Framework/Helpers/FileDownload';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ApplicationInfo = () => {
   const [CurrentPage, setCurrentPage] = useState(1);
@@ -22,9 +23,10 @@ const ApplicationInfo = () => {
 
   //#region Get Application Data
   const GetApplicationData = async () => {
+    const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       Applications_Req: {
-        EntityId: 23119,
+        EntityId: JSON.parse(data).UserEntityMapping.EntityId,
         Page_No: CurrentPage,
       },
     });
@@ -39,12 +41,13 @@ const ApplicationInfo = () => {
   //#endRegion
 
   //#region PDF Download Code
-  const printApplicationSummary = async () => {
+  const printApplicationSummary = async (ApplicationId) => {
+    const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
-      DocumentId: '412246',
-      ApplicationId: 26436,
+      DocumentId: '402258',
+      ApplicationId: ApplicationId,
       ReferenceType: 'APP',
-      UserId: 1,
+      UserId: JSON.parse(data).User.UserId,
     });
     await APICall('/Mobile/CreateApplicationSummary', _request).then(
       fileData => {
@@ -114,7 +117,7 @@ const ApplicationInfo = () => {
           </View>
 
           <TouchableOpacity
-            onPress={printApplicationSummary}
+            onPress={printApplicationSummary.bind(this,item.ApplicationId)}
             style={{width: '40%'}}>
             <Text
               style={{

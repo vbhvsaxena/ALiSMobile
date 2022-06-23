@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {APICall} from '../../API/apiService';
 import moment from 'moment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EmailInfo = ({navigation}) => {
   const [CurrentPage, setCurrentPage] = useState(1);
@@ -22,9 +23,10 @@ const EmailInfo = ({navigation}) => {
 
   //#region Get Emails Data
   const GetEmailsData = async () => {
+    const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       EmailDetails_Req: {
-        EntityId: 23119,
+        EntityId: JSON.parse(data).UserEntityMapping.EntityId,
         Page_No: CurrentPage,
       },
     });

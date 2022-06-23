@@ -59,6 +59,7 @@ const RadioButton = ({onPress, selected, children}) => {
   ]);
   const [loading,setloading]=useState(false);
   const onRadioBtnClick = item => {
+    setClientCode(item.value)
     let updatedState = isLiked.map(isLikedItem =>
       isLikedItem.id === item.id
         ? {...isLikedItem, selected: true}

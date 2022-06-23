@@ -1,13 +1,12 @@
 import React from 'react';
-import {View, StyleSheet, Image, Text} from 'react-native';
+import {View, StyleSheet, Image, Text,BackHandler,Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import CustomButton from './Framework/Wrappers/CustomButton';
 import CustomTextBox from './Framework/Wrappers/CustomTextBox';
 import {APICall} from './API/apiService';
 
+ 
 AsyncStorage.clear();
-
 //#region Styles
 const styles = StyleSheet.create({
   container: {
@@ -60,7 +59,7 @@ export default class LoginScreen extends React.Component {
 
     //#region Check Async Storage exist or not
     AsyncStorage.getItem('clientCode', (error, result) => {
-      if (result) {
+      if (result !== null) {
         this.setState({ClientCode: result});
       } else {
         this.props.navigation.navigate('Client Screen');
@@ -77,6 +76,26 @@ export default class LoginScreen extends React.Component {
       PasswordErrorMessage: '',
       UserCredentialsErrorMessage: '',
     };
+  }
+ 
+  backAction = () => {
+    Alert.alert("Are you sure", "You want to exit?", [
+      {
+        text: "Cancel",
+        onPress: () => null,
+        style: "cancel"
+      },
+      { text: "YES", onPress: () => BackHandler.exitApp() }
+    ]);
+    return true;
+  };
+
+  componentDidMount() {
+    BackHandler.addEventListener("hardwareBackPress", this.backAction);
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener("hardwareBackPress", this.backAction);
   }
 
   validate() {
@@ -95,6 +114,7 @@ export default class LoginScreen extends React.Component {
   }
 
   //#region User Login Method
+  
   UserLogin = async () => {
     var _request = JSON.stringify({
       ValidateUser_Req: {

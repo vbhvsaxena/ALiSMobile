@@ -10,6 +10,7 @@ import {
 import moment from 'moment';
 import {APICall} from '../../API/apiService';
 import {PDFDownload} from '../../Framework/Helpers/FileDownload';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PaymentInfo = () => {
   const [CurrentPage, setCurrentPage] = useState(1);
@@ -22,24 +23,29 @@ const PaymentInfo = () => {
   const [PaymentData, setPaymentData] = useState([]);
 
   const GetPaymentDetails = async () => {
+    const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       PaymentDetails_Req: {
-        EntityId: 23119,
+        EntityId: JSON.parse(data).UserEntityMapping.EntityId,
         Page_No: CurrentPage,
       },
     });
     APICall('/Mobile/GetLicensee_PaymentDetails', _request).then(items => {
-      if (items.PaymentDetails_Res)
+      
+      if (items.PaymentDetails_Res){
         setPaymentData(PaymentData.concat(items.PaymentDetails_Res));
+      }
+        
       else stopFetchMore = false;
+
     });
   };
 
   //#region PDF Download Code
-  const printPaymentReceipt = async () => {
+  const printPaymentReceipt = async (ApplicationId) => {
     var _request = JSON.stringify({
       ClientCode: 'NVDPBH',
-      ApplicationId: 45590,
+      ApplicationId: ApplicationId,
       CredentialHash: 'Credential Number',
       UserName: 'Vaibhav Saxena',
       UserId: 1,
@@ -117,7 +123,7 @@ const PaymentInfo = () => {
           </View>
         </View>
 
-        <TouchableOpacity onPress={printPaymentReceipt} style={{width: '40%'}}>
+        <TouchableOpacity onPress={printPaymentReceipt.bind(this,item.ReferenceId)} style={{width: '40%'}}>
           <Text
             style={{
               fontSize: 20,
