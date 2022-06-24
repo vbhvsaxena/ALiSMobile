@@ -41,10 +41,10 @@ const ApplicationInfo = () => {
   //#endRegion
 
   //#region PDF Download Code
-  const printApplicationSummary = async (ApplicationId) => {
+  const printApplicationSummary = async (ApplicationId,AttachmentId) => {
     const data =await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
-      DocumentId: '402258',
+      DocumentId: AttachmentId,
       ApplicationId: ApplicationId,
       ReferenceType: 'APP',
       UserId: JSON.parse(data).User.UserId,
@@ -117,7 +117,7 @@ const ApplicationInfo = () => {
           </View>
 
           <TouchableOpacity
-            onPress={printApplicationSummary.bind(this,item.ApplicationId)}
+            onPress={printApplicationSummary.bind(this,item.ApplicationId,item.AttachmentId)}
             style={{width: '40%'}}>
             <Text
               style={{

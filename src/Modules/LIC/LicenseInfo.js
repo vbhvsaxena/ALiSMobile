@@ -20,8 +20,10 @@ const LicenseInfo = ({navigation}) => {
   const [LicenseData, setLicenseData] = useState([]);
   const [CurrentPage, setCurrentPage] = useState(1);
   const [ViewEndorsement, setViewEndorsement] = useState(false);
-  
+  const [ShowEndorsementByLicenseId, setEndorsementByLicenseId] =
+    useState(null);
 
+  
   let stopFetchMore = true;
 
   //#region Code used to Handle the back button
@@ -52,7 +54,7 @@ const LicenseInfo = ({navigation}) => {
   }, [CurrentPage]);
 
   const GetLicenseData = async () => {
-    const data =await AsyncStorage.getItem('@UserData');
+    const data = await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       LicenseDetails_Req: {
         LicenseeId: JSON.parse(data).UserEntityMapping.EntityId,
@@ -61,12 +63,11 @@ const LicenseInfo = ({navigation}) => {
     });
     await APICall('/Mobile/GetLicensee_LicenseDetails', _request).then(
       licData => {
-        if (licData.LicenseDetails_Res){
+        if (licData.LicenseDetails_Res) {
           setLicenseData(
             LicenseData.concat(licData.LicenseDetails_Res.License),
           );
-        }
-        else stopFetchMore = false;
+        } else stopFetchMore = false;
       },
     );
   };
@@ -74,16 +75,15 @@ const LicenseInfo = ({navigation}) => {
     navigation.navigate('LicenseDetail', {LicenseId: licenseId});
   };
 
-  const viewEndorsement = () => {
-    if (viewEndorsement) {
-      setViewEndorsement(false)
-    }
+  const ShowEndorsement = async LicenseId => {
+    setEndorsementByLicenseId(LicenseId);
+    if (ViewEndorsement) setViewEndorsement(false);
     else setViewEndorsement(true);
   };
 
   //#region PDF Download Code
-  const printLicense = async (LicenseId) => {
-    const data =await AsyncStorage.getItem('@UserData');
+  const printLicense = async LicenseId => {
+    const data = await AsyncStorage.getItem('@UserData');
     var _request = JSON.stringify({
       CredentialInfo_Req: {
         LicenseId: LicenseId,
@@ -93,7 +93,6 @@ const LicenseInfo = ({navigation}) => {
     });
     await APICall('/Mobile/GenerateLicenseTemplate', _request).then(
       fileData => {
-        
         if (fileData.IsPdfGenerate) PDFDownload(fileData.PdfFileName);
         else console.log(fileData.Message);
       },
@@ -159,8 +158,9 @@ const LicenseInfo = ({navigation}) => {
             {/* View Endorsement Link */}
             <TouchableOpacity
               style={styles.LinkContainer}
-              onPress={viewEndorsement}>
-              {ViewEndorsement ? (
+              onPress={ShowEndorsement.bind(this, item.LicenseId)}>
+              {ViewEndorsement &&
+              ShowEndorsementByLicenseId === item.LicenseId ? (
                 <Text style={styles.EndorsementLink}>Hide Endorsement</Text>
               ) : (
                 <Text style={styles.EndorsementLink}>View Endorsement</Text>
@@ -169,11 +169,11 @@ const LicenseInfo = ({navigation}) => {
             {/* Print License Link */}
             <TouchableOpacity
               style={styles.LinkContainer}
-              onPress={printLicense.bind(this,item.LicenseId)}>
+              onPress={printLicense.bind(this, item.LicenseId)}>
               <Text style={styles.PrintLicenseLink}>Print License</Text>
             </TouchableOpacity>
           </View>
-          {ViewEndorsement  ? (
+          {ViewEndorsement ? (
             <View>
               <EndorsementInfo headerVisible={true}></EndorsementInfo>
             </View>
