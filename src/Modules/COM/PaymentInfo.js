@@ -94,7 +94,7 @@ const PaymentInfo = () => {
             {/* Payment Amount Value */}
             <Text
               style={{textAlign: 'right', fontSize: 20, fontWeight: 'bold'}}>
-              {item.ValidationAmount}
+              {'$' + item.ValidationAmount.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
             </Text>
           </View>
         </View>

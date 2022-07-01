@@ -9,20 +9,21 @@ import LicenseInfo from './Modules/LIC/LicenseInfo';
 import EmailInfo from './Modules/COM/EmailInfo';
 import PaymentInfo from './Modules/COM/PaymentInfo';
 import ApplicationInfo from  './Modules/COM/ApplicationInfo';
+import Profile from './Profile';
 
 const Tab = createMaterialTopTabNavigator();
 
 function Home() {
   return (
     <Tab.Navigator
-      initialRouteName={EmailInfo}
-      tabBarPosition='top'
+      initialRouteName={LicenseInfo}
+      tabBarPosition='bottom'
       screenOptions={({route}) => ({
         tabBarIndicatorStyle:{
           backgroundColor:'white',
         },
         tabBarItemStyle: {
-          width: Dimensions.get('window').width/4,
+          width: Dimensions.get('window').width/5,
           height: 'auto',
           alignItems: 'center',
           justifyContent: 'center',
@@ -67,6 +68,16 @@ function Home() {
                 style={{width: 80, height: 40, marginLeft: -8, marginTop: -10}}
                 color="#fff"></MaterialCommunityIcons>
             );
+          }else if (route.name === 'Profile') {
+            return (
+              <FontAwesome
+                name="user"
+                size={40}
+                style={{width: 300, height: 40, marginLeft:-3, marginTop: -5}}
+                color={
+                  tintColor.focused ? tintColor.color : '#fff'
+                }></FontAwesome>
+            );
           }
         },
         tabBarStyle: {backgroundColor: '#4591d0', elevation: 0},
@@ -75,6 +86,7 @@ function Home() {
       <Tab.Screen name="Application" component={ApplicationInfo}></Tab.Screen>
       <Tab.Screen name="Payment" component={PaymentInfo}></Tab.Screen>
       <Tab.Screen name="Emails" component={EmailInfo}></Tab.Screen>
+      <Tab.Screen name="Profile" component={Profile}></Tab.Screen>
     </Tab.Navigator>
   );
 }

@@ -15,7 +15,7 @@ function Dashboard() {
   return (
     <Tab.Navigator
       initialRouteName={Home}
-      tabBarPosition="bottom"
+      tabBarPosition="top"
       screenOptions={({route}) => ({
         tabBarIndicatorStyle: {
           backgroundColor: 'red',

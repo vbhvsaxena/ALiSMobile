@@ -10,9 +10,8 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import ClientScreen from './src/ClientScreen';
 import LoginScreen from './src/LoginScreen';
-import Dashboard from './src/Dashboard';
+import Home from './src/Home';
 import OTPVerification from './src/OTPVerification';
 import EmailDetail from './src/Modules/COM/EmailDetail';
 import LicenseDetail from './src/Modules/LIC/LicenseDetail';
@@ -23,7 +22,7 @@ const MyStack = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
+        {/* <Stack.Screen
           name="Client Screen"
           component={ClientScreen}
           options={{
@@ -39,7 +38,7 @@ const MyStack = () => {
               fontFamily: 'Arial Helvetica',
             },
           }}
-        />
+        /> */}
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -52,7 +51,7 @@ const MyStack = () => {
         />
         <Stack.Screen
           name="Dashboard"
-          component={Dashboard}
+          component={Home}
           options={{headerShown: false}}
         />
         <Stack.Screen

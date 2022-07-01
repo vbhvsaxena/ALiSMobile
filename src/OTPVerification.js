@@ -10,10 +10,10 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import KeyBoardAvoidingWrapper from './Framework/Wrappers/KeyBoardAvoidingWrapper';
-import CodeInputField from './Framework/Wrappers/CodeInputField';
-import ResendTimer from './Framework/Wrappers/ResendTimer';
-import VerificationModal from './Framework/Wrappers/VerificationModal';
+import KeyBoardAvoidingWrapper from './Framework/Helpers/KeyBoardAvoidingWrapper';
+import CodeInputField from './Framework/Helpers/CodeInputField';
+import ResendTimer from './Framework/Helpers/ResendTimer';
+import VerificationModal from './Framework/Helpers/VerificationModal';
 import {APICall} from './API/apiService'
 
 const OTPVerification = () => {

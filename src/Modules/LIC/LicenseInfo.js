@@ -23,7 +23,6 @@ const LicenseInfo = ({navigation}) => {
   const [ShowEndorsementByLicenseId, setEndorsementByLicenseId] =
     useState(null);
 
-  
   let stopFetchMore = true;
 
   //#region Code used to Handle the back button
@@ -159,12 +158,12 @@ const LicenseInfo = ({navigation}) => {
             <TouchableOpacity
               style={styles.LinkContainer}
               onPress={ShowEndorsement.bind(this, item.LicenseId)}>
-              {ViewEndorsement &&
-              ShowEndorsementByLicenseId === item.LicenseId ? (
-                <Text style={styles.EndorsementLink}>Hide Endorsement</Text>
-              ) : (
-                <Text style={styles.EndorsementLink}>View Endorsement</Text>
-              )}
+              <Text style={styles.EndorsementLink}>
+                {ViewEndorsement &&
+                ShowEndorsementByLicenseId === item.LicenseId
+                  ? 'Hide Endorsement'
+                  : 'View Endorsement'}
+              </Text>
             </TouchableOpacity>
             {/* Print License Link */}
             <TouchableOpacity
@@ -173,7 +172,7 @@ const LicenseInfo = ({navigation}) => {
               <Text style={styles.PrintLicenseLink}>Print License</Text>
             </TouchableOpacity>
           </View>
-          {ViewEndorsement ? (
+          {ViewEndorsement && ShowEndorsementByLicenseId === item.LicenseId ? (
             <View>
               <EndorsementInfo headerVisible={true}></EndorsementInfo>
             </View>

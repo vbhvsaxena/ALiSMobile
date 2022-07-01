@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const APIUrl = 'https://s1.aithent.com/ALiS_Mobile_API/api';
 // const APIUrl = 'http://172.16.2.73/ALiS_Mobile_API/api';
 
@@ -12,7 +14,7 @@ export const APICall = async (methodName, request) => {
       'Access-Control-Allow-Headers':
         'X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Pragma',
       'Access-Control-Expose-Headers': 'Token',
-      ClientCode: 'NVDPBH',
+      ClientCode: await AsyncStorage.getItem('clientCode'),
       Token: '',
     },
     body: request,

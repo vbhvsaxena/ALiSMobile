@@ -1,12 +1,13 @@
 import React from 'react';
-import {View, StyleSheet, Image, Text,BackHandler,Alert} from 'react-native';
+import {View, StyleSheet, Image, Text, BackHandler, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import CustomButton from './Framework/Wrappers/CustomButton';
 import CustomTextBox from './Framework/Wrappers/CustomTextBox';
+import Dropdown from './Framework/Wrappers/CustomDropDown';
+
 import {APICall} from './API/apiService';
 
- 
-AsyncStorage.clear();
 //#region Styles
 const styles = StyleSheet.create({
   container: {
@@ -21,12 +22,13 @@ const styles = StyleSheet.create({
     height: 150,
     width: 200,
     alignItems: 'center',
-    top: 0,
+    top: -100,
     left: 0,
   },
   text: {
     fontFamily: 'Kufam-SemiBoldItalic',
     fontSize: 28,
+    marginTop: -100,
     marginBottom: 10,
     color: '#051d5f',
   },
@@ -36,7 +38,8 @@ const styles = StyleSheet.create({
     padding: 5,
     fontStyle: 'normal',
     color: 'red',
-    marginBottom: 30,
+    marginTop: -50,
+    marginBottom: 50,
   },
   errorContainer: {
     width: '100%',
@@ -52,6 +55,33 @@ const styles = StyleSheet.create({
 });
 //#endRegion
 
+var clientJsonData = [
+  {
+    Id: 1,
+    Text: 'Nevada Division of Public and Behavioral Health(NVDPBH)',
+    Value: 'NVDPBH',
+    IsSelected: false,
+  },
+  {
+    Id: 2,
+    Text: 'Radiation Control Program(NVRCP)',
+    Value: 'NVRCP',
+    IsSelected: false,
+  },
+  {
+    Id: 3,
+    Text: 'Substance Abuse Prevention & Treatment Agency Program(NVSAPTA)',
+    Value: 'NVSAPTA',
+    IsSelected: false,
+  },
+  {
+    Id: 4,
+    Text: 'Texas Office of Court Administration(TXOCA)',
+    Value: 'TXOCA',
+    IsSelected: false,
+  },
+];
+
 //#region Component
 export default class LoginScreen extends React.Component {
   constructor(props) {
@@ -61,8 +91,6 @@ export default class LoginScreen extends React.Component {
     AsyncStorage.getItem('clientCode', (error, result) => {
       if (result !== null) {
         this.setState({ClientCode: result});
-      } else {
-        this.props.navigation.navigate('Client Screen');
       }
       //Redirect to Login Page
     });
@@ -70,6 +98,8 @@ export default class LoginScreen extends React.Component {
 
     this.state = {
       ClientCode: '',
+      ddlSelectedItem: null,
+      ClientCodeErrorMessage: '',
       UserName: '',
       UserNameErrorMessage: '',
       Password: '',
@@ -77,31 +107,42 @@ export default class LoginScreen extends React.Component {
       UserCredentialsErrorMessage: '',
     };
   }
- 
+
   backAction = () => {
-    Alert.alert("Are you sure", "You want to exit?", [
+    Alert.alert('Are you sure', 'You want to exit?', [
       {
-        text: "Cancel",
+        text: 'Cancel',
         onPress: () => null,
-        style: "cancel"
+        style: 'cancel',
       },
-      { text: "YES", onPress: () => BackHandler.exitApp() }
+      {text: 'YES', onPress: () => BackHandler.exitApp()},
     ]);
     return true;
   };
 
   componentDidMount() {
-    BackHandler.addEventListener("hardwareBackPress", this.backAction);
+    BackHandler.addEventListener('hardwareBackPress', this.backAction);
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener("hardwareBackPress", this.backAction);
+    BackHandler.removeEventListener('hardwareBackPress', this.backAction);
+  }
+
+  onSelect(item) {
+    this.setState({ddlSelectedItem: item});
+    this.setState({ClientCode: item?.Value});
+    AsyncStorage.setItem('clientCode', item?.Value);
+    // console.log(AsyncStorage.getItem('clientCode', (error, result) => {console.log('result',result)}));
   }
 
   validate() {
+    this.setState({ClientCodeErrorMessage: ''});
     this.setState({UserNameErrorMessage: ''});
     this.setState({PasswordErrorMessage: ''});
     this.setState({UserCredentialsErrorMessage: ''});
+
+    if (this.state.ClientCode == '')
+      this.setState({ClientCodeErrorMessage: '*Please select Client.'});
 
     if (this.state.UserName == '')
       this.setState({UserNameErrorMessage: '*UserName is a required field.'});
@@ -110,11 +151,11 @@ export default class LoginScreen extends React.Component {
       this.setState({PasswordErrorMessage: '*Password is a required field.'});
 
     if (this.state.UserName == '' || this.state.Password == '') return false;
-    else return true;
+    else this.UserLogin();
   }
 
   //#region User Login Method
-  
+
   UserLogin = async () => {
     var _request = JSON.stringify({
       ValidateUser_Req: {
@@ -122,15 +163,16 @@ export default class LoginScreen extends React.Component {
         Password: this.state.Password,
       },
     });
-    APICall('/Mobile/SignIn', _request).then(items => {
-      if (items.Status === 'Pending') {
+    APICall('/Mobile/SignIn', _request).then(response => {
+      console.log(response)
+      if (response.Status === 'Pending') {
         this.props.navigation.navigate('OtpVerification');
         AsyncStorage.setItem(
           '@UserData',
-          JSON.stringify(items.ValidateUser_Res),
+          JSON.stringify(response.ValidateUser_Res),
         );
       } else {
-        this.setState({UserCredentialsErrorMessage: items.Message});
+        this.setState({UserCredentialsErrorMessage: response.Message});
       }
     });
   };
@@ -155,6 +197,18 @@ export default class LoginScreen extends React.Component {
             using on the online portal.
           </Text>
         </View>
+
+        <Dropdown
+          value={this.state.ddlSelectedItem}
+          items={clientJsonData}
+          onSelect={this.onSelect.bind(this)}></Dropdown>
+        {this.state.ClientCodeErrorMessage != '' ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>
+              {this.state.ClientCodeErrorMessage}
+            </Text>
+          </View>
+        ) : null}
         <CustomTextBox
           onChangeText={UserName => this.setState({UserName})}
           placeholderText="State Portal Login Name"
@@ -190,7 +244,7 @@ export default class LoginScreen extends React.Component {
         ) : null}
         <CustomButton
           buttonTitle="Sign In"
-          onPress={this.UserLogin}></CustomButton>
+          onPress={this.validate.bind(this)}></CustomButton>
 
         {this.state.UserCredentialsErrorMessage != '' ? (
           <View style={styles.errorContainer}>
